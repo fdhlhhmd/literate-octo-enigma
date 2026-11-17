@@ -1,0 +1,7 @@
+id,filename,title,album,is_cover,tags,tag_colors,date_added,description
+img-001,sunset_peaks.svg,Golden Summit Sunset,Alpine Escapes,true,"Sunset;Mountain;Landscape","#d0a35f;#7f9cc4;#8fb49a",2026-11-01,Stunning golden hour light over snow-capped alpine peaks
+img-002,emerald_valley.svg,Emerald Valley River,Alpine Escapes,false,"Nature;Forest;Water","#8fb49a;#7ea38a;#6fb3b8",2026-11-03,Lush green river valley winding through dense pine woods
+img-003,neon_metropolis.svg,Tokyo Cyber Boulevard,Urban Nights,true,"City;Neon;Night","#c48a8a;#a58fc4;#7f9cc4",2026-11-05,Vibrant reflection of neon signs on wet asphalt street
+img-004,skyline_reflections.svg,Harbor Bridge & Skyline,Urban Nights,false,"Architecture;Water;Night","#7f9cc4;#6fb3b8;#8a8a8f",2026-11-08,Downtown skyline glowing across the calm harbor bay
+img-005,desert_dunes.svg,Whispering Sand Dunes,Serene Deserts,true,"Desert;Minimal;Sunset","#c4896a;#d0a35f;#c8a97e",2026-11-10,Rippling patterns formed by desert wind during twilight
+img-006,oasis_haven.svg,Palm Oasis Sanctuary,Serene Deserts,false,"Nature;Water;Travel","#7ea38a;#6fb3b8;#c9b46f",2026-11-12,Hidden desert oasis surrounded by palm trees and fresh spring

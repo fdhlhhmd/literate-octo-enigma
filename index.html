@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#0d0d0e">
+  <title>GalleryVault — The Collection</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400;1,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 rx=%2218%22 fill=%22%230d0d0e%22/><text x=%2250%22 y=%2272%22 font-family=%22Georgia%22 font-style=%22italic%22 font-size=%2266%22 fill=%22%23c8a97e%22 text-anchor=%22middle%22>G</text></svg>">
+</head>
+<body>
+
+  <!-- Icon sprite (referenced via <use href="#i-…">) -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+    <symbol id="i-upload" viewBox="0 0 24 24"><path d="M12 16V4M7 9l5-5 5 5M4 16v3a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-3"/></symbol>
+    <symbol id="i-database" viewBox="0 0 24 24"><ellipse cx="12" cy="5.5" rx="7.5" ry="2.5"/><path d="M4.5 5.5v13c0 1.4 3.4 2.5 7.5 2.5s7.5-1.1 7.5-2.5v-13M4.5 12c0 1.4 3.4 2.5 7.5 2.5s7.5-1.1 7.5-2.5"/></symbol>
+    <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></symbol>
+    <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.2-4.2"/></symbol>
+    <symbol id="i-close" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></symbol>
+    <symbol id="i-arrow-left" viewBox="0 0 24 24"><path d="M19 12H5M11 6l-6 6 6 6"/></symbol>
+    <symbol id="i-arrow-right" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></symbol>
+    <symbol id="i-chevron-left" viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></symbol>
+    <symbol id="i-chevron-right" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></symbol>
+    <symbol id="i-star" viewBox="0 0 24 24"><path d="M12 3.5l2.6 5.3 5.9.9-4.25 4.1 1 5.8L12 16.9l-5.25 2.7 1-5.8L3.5 9.7l5.9-.9z"/></symbol>
+    <symbol id="i-trash" viewBox="0 0 24 24"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 12a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1l1-12M9 7V4h6v3"/></symbol>
+    <symbol id="i-expand" viewBox="0 0 24 24"><path d="M15 4h5v5M9 20H4v-5M20 4l-6.5 6.5M4 20l6.5-6.5"/></symbol>
+    <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 4v12M7 11l5 5 5-5M4 20h16"/></symbol>
+    <symbol id="i-image" viewBox="0 0 24 24"><rect x="3.5" y="4.5" width="17" height="15" rx="1"/><circle cx="9" cy="10" r="1.6"/><path d="M20.5 16l-5-5-9 8.5"/></symbol>
+    <symbol id="i-file" viewBox="0 0 24 24"><path d="M14 3H6.5a1 1 0 0 0-1 1v16a1 1 0 0 0 1 1h11a1 1 0 0 0 1-1V7.5z"/><path d="M14 3v4.5h4.5"/></symbol>
+    <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M20 11a8 8 0 0 0-14.6-4.5L4 8M4 4v4h4M4 13a8 8 0 0 0 14.6 4.5L20 16M20 20v-4h-4"/></symbol>
+  </svg>
+
+  <!-- ===================== Navigation ===================== -->
+  <header class="navbar">
+    <div class="nav-container">
+      <div class="nav-brand" id="brandHomeBtn" title="Home">
+        <span class="brand-mark">Gallery<span>Vault</span></span>
+        <span class="brand-badge">Archive</span>
+      </div>
+
+      <nav class="nav-tabs" aria-label="Views">
+        <button class="nav-tab active" id="tabAlbums">Albums</button>
+        <button class="nav-tab" id="tabPhotos">All Photographs</button>
+      </nav>
+
+      <div class="nav-actions">
+        <button class="btn btn-outline btn-icon" id="btnOpenGuideModal" title="Publishing guide">
+          <svg class="icon"><use href="#i-info"/></svg>
+        </button>
+        <button class="btn btn-outline" id="btnOpenCSVModal" title="Manage CSV database">
+          <svg class="icon"><use href="#i-database"/></svg><span class="btn-label">Database</span>
+        </button>
+        <button class="btn btn-primary" id="btnOpenBulkUpload" title="Upload photographs">
+          <svg class="icon"><use href="#i-upload"/></svg><span class="btn-label">Upload</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ===================== Hero ===================== -->
+  <section class="stats-banner">
+    <div class="stats-container">
+      <div class="stats-headline">
+        <span class="eyebrow">A curated archive</span>
+        <h1>The <em>Collection</em></h1>
+        <p>Photographs arranged into albums and annotated with colour-coded tags — a quiet, static archive served from GitHub Pages.</p>
+      </div>
+      <div class="stats-pills">
+        <div class="stat-pill">
+          <strong id="statTotalPhotos">0</strong>
+          <span>Photographs</span>
+        </div>
+        <div class="stat-pill">
+          <strong id="statTotalAlbums">0</strong>
+          <span>Albums</span>
+        </div>
+        <div class="stat-pill">
+          <strong id="statTotalTags">0</strong>
+          <span>Tags</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== Toolbar ===================== -->
+  <section class="filter-section">
+    <div class="filter-container">
+      <div class="filter-controls-row">
+        <div class="search-box">
+          <span class="search-icon"><svg class="icon"><use href="#i-search"/></svg></span>
+          <input type="text" id="searchInput" placeholder="Search titles, albums, tags…" autocomplete="off">
+        </div>
+
+        <div class="filter-dropdowns">
+          <select id="albumFilterSelect" class="select-control" aria-label="Filter by album">
+            <option value="">All albums</option>
+          </select>
+          <select id="sortSelect" class="select-control" aria-label="Sort order">
+            <option value="date-desc">Newest first</option>
+            <option value="date-asc">Oldest first</option>
+            <option value="title-asc">Title A–Z</option>
+            <option value="album-asc">Album A–Z</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="tag-filter-bar">
+        <span class="tag-filter-label">Tags</span>
+        <div id="tagFilterContainer"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== Main ===================== -->
+  <main class="main-content">
+
+    <section id="albumsViewSection">
+      <div class="view-header">
+        <div class="view-header-title">
+          <span class="eyebrow">Index</span>
+          <h2>Albums</h2>
+        </div>
+        <span class="view-header-note">Select an album to view its photographs</span>
+      </div>
+      <div class="albums-grid" id="albumsGrid"></div>
+    </section>
+
+    <section id="photosViewSection" style="display:none;">
+      <div class="view-header">
+        <div class="view-header-title">
+          <button class="btn btn-ghost btn-sm" id="btnBackToAlbums" style="display:none; align-self:flex-start; padding-left:0;">
+            <svg class="icon icon-sm"><use href="#i-arrow-left"/></svg> All albums
+          </button>
+          <h2 id="photosViewTitle">All Photographs</h2>
+        </div>
+        <span class="view-header-note">Select a photograph to view it full size</span>
+      </div>
+      <div class="photos-grid" id="photosGrid"></div>
+    </section>
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="site-footer-inner">
+      <span>GalleryVault</span>
+      <span>Static archive · metadata.csv · /storage</span>
+    </div>
+  </footer>
+
+  <!-- ===================== Modal: Bulk Upload ===================== -->
+  <div class="modal-backdrop" id="bulkUploadModal">
+    <div class="modal-dialog modal-lg" role="dialog" aria-labelledby="uploadTitle">
+      <div class="modal-header">
+        <div>
+          <span class="eyebrow">New acquisitions</span>
+          <h3 id="uploadTitle">Upload photographs</h3>
+        </div>
+        <button class="modal-close-btn" data-close-modal="bulkUploadModal" aria-label="Close">
+          <svg class="icon"><use href="#i-close"/></svg>
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <div class="dropzone" id="uploadDropzone">
+          <input type="file" id="bulkFileInput" multiple accept="image/*" style="display:none;">
+          <div class="dropzone-icon"><svg class="icon icon-lg"><use href="#i-upload"/></svg></div>
+          <div class="dropzone-text">
+            <h4>Drop images here, or click to browse</h4>
+            <p>JPG · PNG · WEBP · GIF · SVG — select as many as you like</p>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">
+            <span>Selected images</span>
+            <span class="form-hint">Hover a thumbnail to remove it</span>
+          </label>
+          <div class="staged-files-list" id="stagedFilesList">
+            <span class="muted-note">No images selected yet.</span>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="uploadAlbumSelect">Album</label>
+            <select id="uploadAlbumSelect" class="form-control select-control" style="width:100%;">
+              <option value="">Choose an album…</option>
+              <option value="__NEW__">New album…</option>
+            </select>
+          </div>
+          <div class="form-group" id="newAlbumInputGroup" style="display:none;">
+            <label class="form-label" for="uploadNewAlbumName">New album title</label>
+            <input type="text" id="uploadNewAlbumName" class="form-control" placeholder="e.g. Kyoto, Autumn 2026">
+          </div>
+        </div>
+
+        <label class="checkbox-row" for="uploadSetCover">
+          <input type="checkbox" id="uploadSetCover" checked>
+          Use the first image as the album cover
+        </label>
+
+        <div class="form-group">
+          <label class="form-label">
+            <span>Tags</span>
+            <span class="form-hint">Applied to every image in this upload</span>
+          </label>
+          <div class="tag-creator-row">
+            <input type="text" id="uploadTagInput" class="form-control" placeholder="Tag name, then press Enter" style="flex:1;">
+            <div class="color-picker-wrapper">
+              <input type="color" id="uploadTagColor" class="color-input" value="#c8a97e" title="Tag colour">
+            </div>
+            <button type="button" class="btn btn-secondary" id="btnAddStagedTag" style="height:42px;">Add</button>
+          </div>
+          <div class="color-presets" id="uploadColorSwatches"></div>
+          <div class="staged-tags" id="stagedTagsBadges">
+            <span class="muted-note">No tags added.</span>
+          </div>
+        </div>
+
+        <div class="alert-box">
+          <svg class="icon"><use href="#i-info"/></svg>
+          <div>
+            <strong>Publishing on GitHub Pages.</strong>
+            New images appear immediately in this browser session. To make them permanent, open <strong>Database</strong>, download the updated <code>metadata.csv</code> and the new images, place the images in <code>storage/</code>, then commit and push.
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-ghost" data-close-modal="bulkUploadModal">Cancel</button>
+        <button type="button" class="btn btn-primary" id="btnSubmitUpload">Add to collection</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== Modal: Create Album ===================== -->
+  <div class="modal-backdrop" id="createAlbumModal">
+    <div class="modal-dialog" role="dialog" aria-labelledby="createAlbumHeading">
+      <div class="modal-header">
+        <div>
+          <span class="eyebrow">Albums</span>
+          <h3 id="createAlbumHeading">Create an album</h3>
+        </div>
+        <button class="modal-close-btn" data-close-modal="createAlbumModal" aria-label="Close">
+          <svg class="icon"><use href="#i-close"/></svg>
+        </button>
+      </div>
+      <form id="createAlbumForm">
+        <div class="modal-body">
+          <div class="form-group">
+            <label class="form-label" for="createAlbumTitle">Album title</label>
+            <input type="text" id="createAlbumTitle" class="form-control" placeholder="e.g. Wildlife Studies" required>
+          </div>
+          <p>Next, you'll choose the images for this album. The first image becomes the cover; you can change it at any time.</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-ghost" data-close-modal="createAlbumModal">Cancel</button>
+          <button type="submit" class="btn btn-primary">Continue</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ===================== Modal: CSV Database ===================== -->
+  <div class="modal-backdrop" id="csvManagerModal">
+    <div class="modal-dialog modal-lg" role="dialog" aria-labelledby="csvHeading">
+      <div class="modal-header">
+        <div>
+          <span class="eyebrow">metadata.csv</span>
+          <h3 id="csvHeading">Database</h3>
+        </div>
+        <button class="modal-close-btn" data-close-modal="csvManagerModal" aria-label="Close">
+          <svg class="icon"><use href="#i-close"/></svg>
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <p>Every photograph, album, cover and tag colour is stored in a single CSV file. Open it in Excel or Google Sheets to edit by hand; if you edit in Excel, save it as CSV.</p>
+
+        <div class="csv-table-wrapper">
+          <table class="csv-table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Filename</th>
+                <th>Title</th>
+                <th>Album</th>
+                <th>Cover</th>
+                <th>Tags</th>
+                <th>Added</th>
+              </tr>
+            </thead>
+            <tbody id="csvTableBody"></tbody>
+          </table>
+        </div>
+
+        <div class="action-grid">
+          <button type="button" class="btn btn-primary" id="btnExportCSV">
+            <svg class="icon"><use href="#i-download"/></svg> Download metadata.csv
+          </button>
+          <button type="button" class="btn btn-secondary" id="btnDownloadStagedMedia">
+            <svg class="icon"><use href="#i-image"/></svg> Download new images
+          </button>
+          <label class="btn btn-outline" style="margin:0;">
+            <svg class="icon"><use href="#i-file"/></svg> Import a CSV file
+            <input type="file" id="csvFileInput" accept=".csv,text/csv" style="display:none;">
+          </label>
+          <button type="button" class="btn btn-outline" id="btnReloadCSV">
+            <svg class="icon"><use href="#i-refresh"/></svg> Reload from site
+          </button>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-close-modal="csvManagerModal">Done</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== Modal: Guide ===================== -->
+  <div class="modal-backdrop" id="guideModal">
+    <div class="modal-dialog" role="dialog" aria-labelledby="guideHeading">
+      <div class="modal-header">
+        <div>
+          <span class="eyebrow">Guide</span>
+          <h3 id="guideHeading">Publishing to GitHub Pages</h3>
+        </div>
+        <button class="modal-close-btn" data-close-modal="guideModal" aria-label="Close">
+          <svg class="icon"><use href="#i-close"/></svg>
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <ol class="guide-steps">
+          <li><span><strong>Images</strong> are kept in the <code>storage/</code> folder of this repository.</span></li>
+          <li><span><strong>metadata.csv</strong> is the database. It records each image's filename, title, album, cover flag, tags and tag colours.</span></li>
+          <li><span><strong>To add images,</strong> use Upload, then open Database to download the updated <code>metadata.csv</code> and the new images. Put the images in <code>storage/</code>.</span></li>
+          <li><span><strong>Commit and push</strong> your changes:</span>
+            <div class="code-block">git add .
+git commit -m "Add new photographs"
+git push</div>
+          </li>
+          <li><span><strong>Turn on Pages</strong> under <em>Settings → Pages</em>. Choose the <code>main</code> branch and the <code>/ (root)</code> folder.</span></li>
+        </ol>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" data-close-modal="guideModal">Got it</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== Lightbox ===================== -->
+  <div class="lightbox-backdrop" id="lightboxBackdrop">
+    <div class="lightbox-topbar">
+      <div class="lightbox-title" id="lightboxTitle">Photograph</div>
+      <div class="lightbox-tools">
+        <button class="btn btn-outline btn-sm" id="btnLightboxMakeCover" title="Set as album cover">
+          <svg class="icon icon-sm"><use href="#i-star"/></svg><span class="btn-label">Set as cover</span>
+        </button>
+        <button class="btn btn-outline btn-sm" id="btnLightboxDownload" title="Download">
+          <svg class="icon icon-sm"><use href="#i-download"/></svg><span class="btn-label">Download</span>
+        </button>
+        <button class="modal-close-btn" id="btnCloseLightbox" title="Close (Esc)" aria-label="Close">
+          <svg class="icon"><use href="#i-close"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <div class="lightbox-main">
+      <button class="lightbox-nav-btn lightbox-prev" id="btnLightboxPrev" title="Previous" aria-label="Previous">
+        <svg class="icon"><use href="#i-chevron-left"/></svg>
+      </button>
+      <img id="lightboxImg" class="lightbox-img" src="" alt="">
+      <button class="lightbox-nav-btn lightbox-next" id="btnLightboxNext" title="Next" aria-label="Next">
+        <svg class="icon"><use href="#i-chevron-right"/></svg>
+      </button>
+    </div>
+
+    <div class="lightbox-footer">
+      <div class="lightbox-meta-info" id="lightboxMetaInfo"></div>
+      <div class="lightbox-hint"><kbd>←</kbd><kbd>→</kbd> navigate &nbsp; <kbd>Esc</kbd> close</div>
+    </div>
+  </div>
+
+  <div class="toast-container" id="toastContainer"></div>
+
+  <script src="js/app.js"></script>
+</body>
+</html>

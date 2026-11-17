@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" width="100%" height="100%">
+  <defs>
+    <linearGradient id="sky5" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#0284c7"/>
+      <stop offset="60%" stop-color="#fed7aa"/>
+      <stop offset="100%" stop-color="#fdba74"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="600" fill="url(#sky5)"/>
+  <!-- Sun -->
+  <circle cx="160" cy="180" r="50" fill="#fef08a" opacity="0.95"/>
+  <!-- Dunes -->
+  <path d="M-50,340 Q250,280 600,360 T850,320 L850,600 L-50,600 Z" fill="#d97706"/>
+  <!-- Oasis Pool -->
+  <ellipse cx="440" cy="460" rx="260" ry="55" fill="#0284c7" filter="drop-shadow(0 0 10px #38bdf8)"/>
+  <ellipse cx="440" cy="460" rx="230" ry="40" fill="#06b6d4"/>
+  <!-- Palms -->
+  <path d="M220,440 Q230,360 210,300" stroke="#78350f" stroke-width="8" stroke-linecap="round" fill="none"/>
+  <circle cx="205" cy="290" r="28" fill="#15803d"/>
+  <circle cx="225" cy="290" r="25" fill="#16a34a"/>
+  <circle cx="190" cy="305" r="22" fill="#15803d"/>
+  <path d="M620,430 Q605,350 630,290" stroke="#78350f" stroke-width="8" stroke-linecap="round" fill="none"/>
+  <circle cx="635" cy="285" r="28" fill="#15803d"/>
+  <circle cx="615" cy="285" r="25" fill="#16a34a"/>
+  <rect y="540" width="800" height="60" fill="#1c1917" opacity="0.9"/>
+  <text x="400" y="580" fill="#67e8f9" font-family="system-ui, sans-serif" font-size="16" text-anchor="middle" letter-spacing="3">SERENE DESERTS • PALM OASIS</text>
+</svg>

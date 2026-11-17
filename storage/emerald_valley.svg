@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" width="100%" height="100%">
+  <defs>
+    <linearGradient id="sky2" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#0284c7"/>
+      <stop offset="60%" stop-color="#bae6fd"/>
+      <stop offset="100%" stop-color="#f0fdf4"/>
+    </linearGradient>
+    <linearGradient id="river" x1="50%" y1="0%" x2="50%" y2="100%">
+      <stop offset="0%" stop-color="#38bdf8"/>
+      <stop offset="100%" stop-color="#0284c7"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="600" fill="url(#sky2)"/>
+  <circle cx="650" cy="120" r="50" fill="#fef08a" opacity="0.9"/>
+  <path d="M-50,420 Q180,280 400,360 T850,300 L850,600 L-50,600 Z" fill="#15803d"/>
+  <path d="M-50,460 Q220,380 500,430 T850,380 L850,600 L-50,600 Z" fill="#166534"/>
+  <path d="M380,360 C370,420 320,480 200,600 L360,600 C430,510 440,430 400,360 Z" fill="url(#river)"/>
+  <!-- Trees -->
+  <polygon points="120,440 100,500 140,500" fill="#052e16"/>
+  <polygon points="180,410 160,480 200,480" fill="#052e16"/>
+  <polygon points="620,420 595,500 645,500" fill="#052e16"/>
+  <polygon points="690,440 670,510 710,510" fill="#052e16"/>
+  <rect y="540" width="800" height="60" fill="#0f172a" opacity="0.9"/>
+  <text x="400" y="580" fill="#86efac" font-family="system-ui, sans-serif" font-size="16" text-anchor="middle" letter-spacing="3">ALPINE ESCAPES • EMERALD VALLEY</text>
+</svg>
