@@ -30,6 +30,7 @@
     <symbol id="i-expand" viewBox="0 0 24 24"><path d="M15 4h5v5M9 20H4v-5M20 4l-6.5 6.5M4 20l6.5-6.5"/></symbol>
     <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 4v12M7 11l5 5 5-5M4 20h16"/></symbol>
     <symbol id="i-image" viewBox="0 0 24 24"><rect x="3.5" y="4.5" width="17" height="15" rx="1"/><circle cx="9" cy="10" r="1.6"/><path d="M20.5 16l-5-5-9 8.5"/></symbol>
+    <symbol id="i-edit" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></symbol>
     <symbol id="i-file" viewBox="0 0 24 24"><path d="M14 3H6.5a1 1 0 0 0-1 1v16a1 1 0 0 0 1 1h11a1 1 0 0 0 1-1V7.5z"/><path d="M14 3v4.5h4.5"/></symbol>
     <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M20 11a8 8 0 0 0-14.6-4.5L4 8M4 4v4h4M4 13a8 8 0 0 0 14.6 4.5L20 16M20 20v-4h-4"/></symbol>
   </svg>
@@ -61,28 +62,72 @@
     </div>
   </header>
 
-  <!-- ===================== Hero ===================== -->
-  <section class="stats-banner">
-    <div class="stats-container">
-      <div class="stats-headline">
-        <span class="eyebrow">A curated archive</span>
-        <h1>The <em>Collection</em></h1>
-        <p>Photographs arranged into albums and annotated with colour-coded tags — a quiet, static archive served from GitHub Pages.</p>
+  <!-- ===================== Highlight 3D Carousel Section ===================== -->
+  <section class="highlight-section" id="highlightSection">
+    <div class="highlight-container">
+      
+      <!-- Highlight Header -->
+      <div class="highlight-header">
+        <span class="highlight-eyebrow">
+          <svg class="icon icon-sm"><use href="#i-star"/></svg>
+          Highlight
+        </span>
+        <h1 class="highlight-headline">AWARD WINNING<br>CREATORS</h1>
+        <p class="highlight-subtitle">
+          Explore an archive where art and design merge to shape what's next. A curved 3D exhibition of our finest works.
+        </p>
+
+        <!-- Interactive Showcase Album Selector -->
+        <div class="highlight-album-bar">
+          <span class="highlight-control-label">
+            <svg class="icon icon-sm"><use href="#i-image"/></svg>
+            <span>Showcase Album:</span>
+          </span>
+          <div class="highlight-album-pills" id="highlightAlbumPills">
+            <!-- Dynamically populated album pill buttons -->
+          </div>
+        </div>
       </div>
-      <div class="stats-pills">
-        <div class="stat-pill">
-          <strong id="statTotalPhotos">0</strong>
-          <span>Photographs</span>
+
+      <!-- 3D Cylindrical Curved Carousel Viewport (Naturally follows device width) -->
+      <div class="carousel-3d-viewport" id="carousel3DViewport" title="Drag to spin 3D carousel">
+        <button class="carousel-nav-btn carousel-nav-prev" id="btnCarouselPrev" aria-label="Previous photograph">
+          <svg class="icon"><use href="#i-chevron-left"/></svg>
+        </button>
+
+        <div class="carousel-3d-stage" id="carousel3DStage">
+          <!-- Dynamically populated 3D curved cards -->
         </div>
-        <div class="stat-pill">
-          <strong id="statTotalAlbums">0</strong>
-          <span>Albums</span>
+
+        <button class="carousel-nav-btn carousel-nav-next" id="btnCarouselNext" aria-label="Next photograph">
+          <svg class="icon"><use href="#i-chevron-right"/></svg>
+        </button>
+      </div>
+
+      <!-- Highlight Footer with Hint and Stats -->
+      <div class="highlight-footer">
+        <div class="highlight-hint">
+          <span class="hint-dot"></span>
+          <span id="highlightAlbumNotice">Showcasing all photographs</span>
+          <span style="opacity:0.4;">•</span>
+          <span>Drag or scroll to rotate • Click any card to inspect in full view</span>
         </div>
-        <div class="stat-pill">
-          <strong id="statTotalTags">0</strong>
-          <span>Tags</span>
+        <div class="highlight-stats-pills">
+          <div class="highlight-stat-pill">
+            <strong id="statTotalPhotos">0</strong>
+            <span>Photographs</span>
+          </div>
+          <div class="highlight-stat-pill">
+            <strong id="statTotalAlbums">0</strong>
+            <span>Albums</span>
+          </div>
+          <div class="highlight-stat-pill">
+            <strong id="statTotalTags">0</strong>
+            <span>Tags</span>
+          </div>
         </div>
       </div>
+
     </div>
   </section>
 
@@ -265,6 +310,136 @@
     </div>
   </div>
 
+  <!-- ===================== Modal: Edit Photograph (CRUD Update/Delete) ===================== -->
+  <div class="modal-backdrop" id="editPhotoModal">
+    <div class="modal-dialog modal-lg" role="dialog" aria-labelledby="editPhotoHeading">
+      <div class="modal-header">
+        <div>
+          <span class="eyebrow">Photograph Details</span>
+          <h3 id="editPhotoHeading">Edit photograph</h3>
+        </div>
+        <button class="modal-close-btn" data-close-modal="editPhotoModal" aria-label="Close">
+          <svg class="icon"><use href="#i-close"/></svg>
+        </button>
+      </div>
+
+      <form id="editPhotoForm">
+        <div class="modal-body">
+          <input type="hidden" id="editPhotoId">
+
+          <div class="form-group">
+            <label class="form-label" for="editPhotoTitle">Title</label>
+            <input type="text" id="editPhotoTitle" class="form-control" placeholder="Photograph title" required>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="editPhotoAlbumSelect">Album</label>
+              <select id="editPhotoAlbumSelect" class="form-control select-control" style="width:100%;">
+                <!-- Populated dynamically -->
+              </select>
+            </div>
+            <div class="form-group" id="editPhotoNewAlbumGroup" style="display:none;">
+              <label class="form-label" for="editPhotoNewAlbumName">New Album Title</label>
+              <input type="text" id="editPhotoNewAlbumName" class="form-control" placeholder="e.g. Architectural Studies">
+            </div>
+          </div>
+
+          <label class="checkbox-row" for="editPhotoIsCover">
+            <input type="checkbox" id="editPhotoIsCover">
+            Set as album cover for this album
+          </label>
+
+          <div class="form-group">
+            <label class="form-label" for="editPhotoDescription">Description / Notes</label>
+            <textarea id="editPhotoDescription" class="form-control" rows="3" placeholder="Optional caption, location, camera details..."></textarea>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">
+              <span>Tags</span>
+              <span class="form-hint">Assign color-coded labels</span>
+            </label>
+            <div class="tag-creator-row">
+              <input type="text" id="editPhotoTagInput" class="form-control" placeholder="Add tag name and press Enter" style="flex:1;">
+              <div class="color-picker-wrapper">
+                <input type="color" id="editPhotoTagColor" class="color-input" value="#c8a97e" title="Tag colour">
+              </div>
+              <button type="button" class="btn btn-secondary" id="btnAddEditPhotoTag" style="height:42px;">Add</button>
+            </div>
+            <div class="color-presets" id="editPhotoColorSwatches"></div>
+            <div class="staged-tags" id="editPhotoTagsBadges"></div>
+          </div>
+
+          <div class="form-meta-box">
+            <div class="meta-item"><span>Filename:</span> <code id="editPhotoFilename">storage/...</code></div>
+            <div class="meta-item"><span>Date Added:</span> <span id="editPhotoDate">-</span></div>
+          </div>
+        </div>
+
+        <div class="modal-footer" style="justify-content: space-between;">
+          <button type="button" class="btn btn-danger btn-sm" id="btnDeletePhotoFromModal">
+            <svg class="icon icon-sm"><use href="#i-trash"/></svg> Delete Photo
+          </button>
+          <div style="display:flex; gap:0.6rem;">
+            <button type="button" class="btn btn-ghost" data-close-modal="editPhotoModal">Cancel</button>
+            <button type="submit" class="btn btn-primary">Save Changes</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ===================== Modal: Edit Album (CRUD Update/Delete) ===================== -->
+  <div class="modal-backdrop" id="editAlbumModal">
+    <div class="modal-dialog" role="dialog" aria-labelledby="editAlbumHeading">
+      <div class="modal-header">
+        <div>
+          <span class="eyebrow">Album Settings</span>
+          <h3 id="editAlbumHeading">Edit album</h3>
+        </div>
+        <button class="modal-close-btn" data-close-modal="editAlbumModal" aria-label="Close">
+          <svg class="icon"><use href="#i-close"/></svg>
+        </button>
+      </div>
+
+      <form id="editAlbumForm">
+        <div class="modal-body">
+          <input type="hidden" id="editAlbumOriginalTitle">
+
+          <div class="form-group">
+            <label class="form-label" for="editAlbumTitleInput">Album Title</label>
+            <input type="text" id="editAlbumTitleInput" class="form-control" placeholder="Album title" required>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="editAlbumCoverSelect">Album Cover Photograph</label>
+            <select id="editAlbumCoverSelect" class="form-control select-control" style="width:100%;">
+              <!-- Populated dynamically with photos in this album -->
+            </select>
+          </div>
+
+          <div class="alert-box">
+            <svg class="icon"><use href="#i-info"/></svg>
+            <div>
+              Renaming this album will automatically update all photographs currently grouped under it.
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer" style="justify-content: space-between;">
+          <button type="button" class="btn btn-danger btn-sm" id="btnDeleteAlbumFromModal">
+            <svg class="icon icon-sm"><use href="#i-trash"/></svg> Delete Album
+          </button>
+          <div style="display:flex; gap:0.6rem;">
+            <button type="button" class="btn btn-ghost" data-close-modal="editAlbumModal">Cancel</button>
+            <button type="submit" class="btn btn-primary">Save Album</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <!-- ===================== Modal: CSV Database ===================== -->
   <div class="modal-backdrop" id="csvManagerModal">
     <div class="modal-dialog modal-lg" role="dialog" aria-labelledby="csvHeading">
@@ -359,6 +534,9 @@ git push</div>
     <div class="lightbox-topbar">
       <div class="lightbox-title" id="lightboxTitle">Photograph</div>
       <div class="lightbox-tools">
+        <button class="btn btn-outline btn-sm" id="btnLightboxEdit" title="Edit photograph details">
+          <svg class="icon icon-sm"><use href="#i-edit"/></svg><span class="btn-label">Edit</span>
+        </button>
         <button class="btn btn-outline btn-sm" id="btnLightboxMakeCover" title="Set as album cover">
           <svg class="icon icon-sm"><use href="#i-star"/></svg><span class="btn-label">Set as cover</span>
         </button>

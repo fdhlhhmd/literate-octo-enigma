@@ -21,6 +21,8 @@
     stagedUploadFiles: [],    // Array of { file: File, previewUrl: string, title: string }
     stagedTags: [],           // Array of { name: string, color: string }
     newlyAddedFiles: [],      // Files added in this session needing to be saved to storage/
+    highlightAlbum: '',       // Album name showcased in Highlight section ('' = all)
+    carouselWidth: 1100,      // Interactive width for 3D carousel in px or 'full'
   };
 
   const DEFAULT_TAG_COLORS = [
@@ -227,6 +229,8 @@
       { id: 'img-004', filename: 'skyline_reflections.svg', title: 'Harbor Bridge & Skyline', album: 'Urban Nights', is_cover: 'false', tags: 'Architecture;Water;Night', tag_colors: '#7f9cc4;#6fb3b8;#8a8a8f', date_added: '2026-11-08', description: 'Downtown skyline glowing across the calm harbor bay' },
       { id: 'img-005', filename: 'desert_dunes.svg', title: 'Whispering Sand Dunes', album: 'Serene Deserts', is_cover: 'true', tags: 'Desert;Minimal;Sunset', tag_colors: '#c4896a;#d0a35f;#c8a97e', date_added: '2026-11-10', description: 'Rippling patterns formed by desert wind during twilight' },
       { id: 'img-006', filename: 'oasis_haven.svg', title: 'Palm Oasis Sanctuary', album: 'Serene Deserts', is_cover: 'false', tags: 'Nature;Water;Travel', tag_colors: '#7ea38a;#6fb3b8;#c9b46f', date_added: '2026-11-12', description: 'Hidden desert oasis surrounded by palm trees and fresh spring' },
+      { id: 'img-007', filename: 'coastal_arch.svg', title: 'Azure Coastal Arch', album: 'Coastal Vistas', is_cover: 'true', tags: 'Coast;Ocean;Nature', tag_colors: '#6fb3b8;#7f9cc4;#8fb49a', date_added: '2026-11-14', description: 'Majestic sea cliff arch carved by Mediterranean waves' },
+      { id: 'img-008', filename: 'aurora_fjord.svg', title: 'Arctic Aurora Borealis', album: 'Nordic Wonders', is_cover: 'true', tags: 'Aurora;Night;Fjord', tag_colors: '#8fb49a;#7ea38a;#6fb3b8', date_added: '2026-11-16', description: 'Luminescent emerald northern lights dancing over a quiet arctic fjord' },
     ];
     processCSVData(serializeCSV(seed));
   }
@@ -321,6 +325,8 @@
     renderStats();
     renderAlbumDropdown();
     renderTagFilters();
+    renderHighlightAlbumPills();
+    render3DCurvedCarousel();
     if (state.currentView === 'albums') {
       renderAlbumsView();
     } else {
@@ -426,7 +432,17 @@
           <div class="album-info">
             <span class="album-index">${String(i + 1).padStart(2, '0')}</span>
             <h3 class="album-title">${escapeHTML(album.title)}</h3>
-            <div class="album-tags-summary">${tagsBadges}</div>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-top:0.35rem; padding-top:0.45rem; border-top:1px solid var(--line); flex-wrap:wrap; gap:0.4rem;">
+              <div class="album-tags-summary">${tagsBadges}</div>
+              <div style="display:flex; gap:0.35rem;">
+                <button type="button" class="btn btn-ghost btn-sm btn-edit-album" data-album="${escapeHTML(album.title)}" title="Edit album settings">
+                  ${icon('edit', 'icon-sm')} Edit
+                </button>
+                <button type="button" class="btn btn-ghost btn-sm btn-feature-highlight" data-album="${escapeHTML(album.title)}" title="Showcase this album in Highlight section">
+                  ${icon('star', 'icon-sm')} Highlight
+                </button>
+              </div>
+            </div>
           </div>
         </article>
       `;
@@ -437,8 +453,29 @@
     // Attach card clicks
     container.querySelectorAll('.album-card').forEach(card => {
       card.addEventListener('click', (e) => {
+        if (e.target.closest('.btn-feature-highlight, .btn-edit-album')) return;
         const albumName = card.getAttribute('data-album');
         openAlbumPhotos(albumName);
+      });
+    });
+
+    // Edit Album button
+    container.querySelectorAll('.btn-edit-album').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const albumName = btn.getAttribute('data-album');
+        openEditAlbumModal(albumName);
+      });
+    });
+
+    // Feature in Highlight button
+    container.querySelectorAll('.btn-feature-highlight').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const albumName = btn.getAttribute('data-album');
+        setHighlightAlbum(albumName);
+        const sec = document.getElementById('highlightSection');
+        if (sec) sec.scrollIntoView({ behavior: 'smooth' });
       });
     });
 
@@ -509,8 +546,9 @@
             ${isCover ? `<span class="cover-indicator">${icon('star', 'icon-sm')} Cover</span>` : ''}
             <div class="photo-quick-actions">
               <button class="photo-action-btn btn-quick-view" title="View full size" aria-label="View full size" data-index="${idx}">${icon('expand', 'icon-sm')}</button>
+              <button class="photo-action-btn btn-edit-photo" title="Edit details" aria-label="Edit details" data-id="${pid}">${icon('edit', 'icon-sm')}</button>
               <button class="photo-action-btn btn-make-cover" title="${isCover ? 'Album cover' : 'Set as album cover'}" aria-label="Set as album cover" data-id="${pid}">${icon('star', 'icon-sm')}</button>
-              <button class="photo-action-btn is-danger btn-delete-photo" title="Remove" aria-label="Remove" data-id="${pid}">${icon('trash', 'icon-sm')}</button>
+              <button class="photo-action-btn is-danger btn-delete-photo" title="Delete photograph" aria-label="Delete photograph" data-id="${pid}">${icon('trash', 'icon-sm')}</button>
             </div>
           </div>
           <div class="photo-details">
@@ -541,6 +579,15 @@
         e.stopPropagation();
         const index = parseInt(btn.getAttribute('data-index'), 10);
         openLightbox(index);
+      });
+    });
+
+    // Edit photo button
+    container.querySelectorAll('.btn-edit-photo').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const id = btn.getAttribute('data-id');
+        openEditPhotoModal(id);
       });
     });
 
@@ -617,8 +664,317 @@
     }
 
     state.photos = state.photos.filter(p => p.id !== photoId);
+    // Also remove from newlyAddedFiles if present
+    state.newlyAddedFiles = state.newlyAddedFiles.filter(item => item.name !== photo.filename);
+    
+    // Close lightbox or modal if open
+    closeLightbox();
+    closeModal('editPhotoModal');
+
     showToast(`Removed "${photo.title}" from gallery. Remember to export updated CSV!`, 'info');
     renderAll();
+  }
+
+  // =========================================================================
+  // Edit Modals: Full Photo & Album CRUD Management
+  // =========================================================================
+
+  let currentEditPhotoTags = [];
+
+  function openEditPhotoModal(photoId) {
+    const photo = state.photos.find(p => p.id === photoId);
+    if (!photo) return;
+
+    const idInput = document.getElementById('editPhotoId');
+    const titleInput = document.getElementById('editPhotoTitle');
+    const albumSelect = document.getElementById('editPhotoAlbumSelect');
+    const newAlbumGroup = document.getElementById('editPhotoNewAlbumGroup');
+    const newAlbumName = document.getElementById('editPhotoNewAlbumName');
+    const isCoverCheck = document.getElementById('editPhotoIsCover');
+    const descInput = document.getElementById('editPhotoDescription');
+    const filenameEl = document.getElementById('editPhotoFilename');
+    const dateEl = document.getElementById('editPhotoDate');
+
+    if (idInput) idInput.value = photo.id;
+    if (titleInput) titleInput.value = photo.title || '';
+    if (descInput) descInput.value = photo.description || '';
+    if (isCoverCheck) isCoverCheck.checked = Boolean(photo.isCover);
+    if (filenameEl) filenameEl.textContent = 'storage/' + photo.filename;
+    if (dateEl) dateEl.textContent = formatDate(photo.dateAdded);
+
+    // Populate album select dropdown
+    if (albumSelect) {
+      const albums = getAlbumsSummary();
+      let optHtml = '';
+      let found = false;
+      albums.forEach(a => {
+        if (a.title === photo.album) found = true;
+        optHtml += `<option value="${escapeHTML(a.title)}">${escapeHTML(a.title)}</option>`;
+      });
+      if (!found && photo.album) {
+        optHtml = `<option value="${escapeHTML(photo.album)}">${escapeHTML(photo.album)}</option>` + optHtml;
+      }
+      optHtml += '<option value="__NEW__">+ Create new album…</option>';
+      albumSelect.innerHTML = optHtml;
+      albumSelect.value = photo.album || (albums[0] ? albums[0].title : 'General');
+    }
+
+    if (newAlbumGroup) newAlbumGroup.style.display = 'none';
+    if (newAlbumName) newAlbumName.value = '';
+
+    // Initialize tags for this photo
+    currentEditPhotoTags = [...photo.tags];
+    renderEditPhotoTags();
+
+    openModal('editPhotoModal');
+  }
+
+  function renderEditPhotoTags() {
+    const container = document.getElementById('editPhotoTagsBadges');
+    if (!container) return;
+
+    if (currentEditPhotoTags.length === 0) {
+      container.innerHTML = '<span class="muted-note" style="color:var(--text-3); font-size:0.75rem;">No tags assigned yet.</span>';
+      return;
+    }
+
+    container.innerHTML = currentEditPhotoTags
+      .map((t, idx) => tagBadge(t, { removable: idx }))
+      .join('');
+
+    container.querySelectorAll('.remove-staged-tag').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const idx = parseInt(btn.getAttribute('data-index'), 10);
+        currentEditPhotoTags.splice(idx, 1);
+        renderEditPhotoTags();
+      });
+    });
+  }
+
+  function openEditAlbumModal(albumName) {
+    if (!albumName) return;
+
+    const origTitleInput = document.getElementById('editAlbumOriginalTitle');
+    const titleInput = document.getElementById('editAlbumTitleInput');
+    const coverSelect = document.getElementById('editAlbumCoverSelect');
+
+    if (origTitleInput) origTitleInput.value = albumName;
+    if (titleInput) titleInput.value = albumName;
+
+    const albumPhotos = state.photos.filter(p => p.album === albumName);
+
+    if (coverSelect) {
+      if (albumPhotos.length === 0) {
+        coverSelect.innerHTML = '<option value="">(No photographs in this album)</option>';
+      } else {
+        let optHtml = '';
+        albumPhotos.forEach(p => {
+          const isCover = p.isCover ? ' (Current Cover)' : '';
+          optHtml += `<option value="${escapeHTML(p.id)}" ${p.isCover ? 'selected' : ''}>${escapeHTML(p.title || p.filename)}${isCover}</option>`;
+        });
+        coverSelect.innerHTML = optHtml;
+      }
+    }
+
+    openModal('editAlbumModal');
+  }
+
+  function deleteAlbum(albumName) {
+    if (!albumName) return;
+
+    const albumPhotos = state.photos.filter(p => p.album === albumName);
+    const msg = `Are you sure you want to delete the album “${albumName}”?\n\nAll ${albumPhotos.length} photograph(s) in this album will be safely reassigned to “General”.`;
+    if (!confirm(msg)) return;
+
+    // Reassign photos to 'General'
+    state.photos.forEach(p => {
+      if (p.album === albumName) {
+        p.album = 'General';
+      }
+    });
+
+    if (state.filterAlbum === albumName) {
+      state.filterAlbum = null;
+    }
+    if (state.highlightAlbum === albumName) {
+      state.highlightAlbum = '';
+    }
+
+    closeModal('editAlbumModal');
+    showToast(`Deleted album “${albumName}”. Photographs reassigned to General.`, 'info');
+    renderAll();
+  }
+
+  function initEditModals() {
+    // 1. Edit Photo Form submit
+    const editPhotoForm = document.getElementById('editPhotoForm');
+    if (editPhotoForm) {
+      editPhotoForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const id = document.getElementById('editPhotoId').value;
+        const photo = state.photos.find(p => p.id === id);
+        if (!photo) return;
+
+        const newTitle = document.getElementById('editPhotoTitle').value.trim();
+        let targetAlbum = document.getElementById('editPhotoAlbumSelect').value;
+        if (targetAlbum === '__NEW__') {
+          const customAlbum = document.getElementById('editPhotoNewAlbumName').value.trim();
+          if (!customAlbum) {
+            alert('Please enter a title for the new album.');
+            return;
+          }
+          targetAlbum = customAlbum;
+        }
+
+        const isCover = document.getElementById('editPhotoIsCover').checked;
+        const desc = document.getElementById('editPhotoDescription').value.trim();
+
+        photo.title = newTitle || photo.title;
+        photo.album = targetAlbum || photo.album || 'General';
+        photo.description = desc;
+        photo.tags = [...currentEditPhotoTags];
+
+        if (isCover) {
+          state.photos.forEach(p => {
+            if (p.album === photo.album) {
+              p.isCover = (p.id === photo.id);
+            }
+          });
+        } else {
+          photo.isCover = false;
+        }
+
+        closeModal('editPhotoModal');
+        showToast(`Saved changes to “${photo.title}”.`, 'success');
+        renderAll();
+      });
+    }
+
+    // Delete photo from edit modal button
+    const btnDeletePhoto = document.getElementById('btnDeletePhotoFromModal');
+    if (btnDeletePhoto) {
+      btnDeletePhoto.addEventListener('click', () => {
+        const id = document.getElementById('editPhotoId').value;
+        deletePhoto(id);
+      });
+    }
+
+    // Edit Photo Album select __NEW__ toggle
+    const editPhotoAlbumSelect = document.getElementById('editPhotoAlbumSelect');
+    const editPhotoNewAlbumGroup = document.getElementById('editPhotoNewAlbumGroup');
+    const editPhotoNewAlbumName = document.getElementById('editPhotoNewAlbumName');
+    if (editPhotoAlbumSelect && editPhotoNewAlbumGroup) {
+      editPhotoAlbumSelect.addEventListener('change', () => {
+        if (editPhotoAlbumSelect.value === '__NEW__') {
+          editPhotoNewAlbumGroup.style.display = 'block';
+          if (editPhotoNewAlbumName) editPhotoNewAlbumName.focus();
+        } else {
+          editPhotoNewAlbumGroup.style.display = 'none';
+        }
+      });
+    }
+
+    // Edit Photo Tag Input and Color Presets
+    const editTagInput = document.getElementById('editPhotoTagInput');
+    const editTagColor = document.getElementById('editPhotoTagColor');
+    const btnAddEditTag = document.getElementById('btnAddEditPhotoTag');
+    const editColorSwatches = document.getElementById('editPhotoColorSwatches');
+
+    function addEditPhotoTag() {
+      if (!editTagInput) return;
+      const val = editTagInput.value.trim();
+      const color = editTagColor ? editTagColor.value : '#c8a97e';
+      if (!val) return;
+
+      if (!currentEditPhotoTags.some(t => t.toLowerCase() === val.toLowerCase())) {
+        currentEditPhotoTags.push(val);
+        state.tagColors[val] = color;
+      }
+      editTagInput.value = '';
+      renderEditPhotoTags();
+    }
+
+    if (btnAddEditTag) btnAddEditTag.addEventListener('click', addEditPhotoTag);
+    if (editTagInput) {
+      editTagInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          addEditPhotoTag();
+        }
+      });
+    }
+
+    if (editColorSwatches && editTagColor) {
+      editColorSwatches.innerHTML = DEFAULT_TAG_COLORS.map(c => `
+        <div class="color-swatch" style="background-color:${c}" data-color="${c}" title="${c}"></div>
+      `).join('');
+
+      function syncEditSwatches() {
+        const current = editTagColor.value.toLowerCase();
+        editColorSwatches.querySelectorAll('.color-swatch').forEach(s => {
+          s.classList.toggle('active', s.getAttribute('data-color').toLowerCase() === current);
+        });
+      }
+
+      editColorSwatches.querySelectorAll('.color-swatch').forEach(swatch => {
+        swatch.addEventListener('click', () => {
+          editTagColor.value = swatch.getAttribute('data-color');
+          syncEditSwatches();
+        });
+      });
+
+      editTagColor.addEventListener('input', syncEditSwatches);
+      syncEditSwatches();
+    }
+
+    // 2. Edit Album Form submit
+    const editAlbumForm = document.getElementById('editAlbumForm');
+    if (editAlbumForm) {
+      editAlbumForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const origTitle = document.getElementById('editAlbumOriginalTitle').value;
+        const newTitle = document.getElementById('editAlbumTitleInput').value.trim();
+        if (!newTitle) {
+          alert('Album title cannot be empty.');
+          return;
+        }
+
+        const selectedCoverId = document.getElementById('editAlbumCoverSelect').value;
+
+        // Update album title across all photos
+        if (newTitle !== origTitle) {
+          state.photos.forEach(p => {
+            if (p.album === origTitle) {
+              p.album = newTitle;
+            }
+          });
+          if (state.filterAlbum === origTitle) state.filterAlbum = newTitle;
+          if (state.highlightAlbum === origTitle) state.highlightAlbum = newTitle;
+        }
+
+        // Update cover photo
+        if (selectedCoverId) {
+          state.photos.forEach(p => {
+            if (p.album === newTitle) {
+              p.isCover = (p.id === selectedCoverId);
+            }
+          });
+        }
+
+        closeModal('editAlbumModal');
+        showToast(`Updated album “${newTitle}”.`, 'success');
+        renderAll();
+      });
+    }
+
+    // Delete album from edit modal button
+    const btnDeleteAlbum = document.getElementById('btnDeleteAlbumFromModal');
+    if (btnDeleteAlbum) {
+      btnDeleteAlbum.addEventListener('click', () => {
+        const origTitle = document.getElementById('editAlbumOriginalTitle').value;
+        deleteAlbum(origTitle);
+      });
+    }
   }
 
   // =========================================================================
@@ -887,6 +1243,7 @@
     const metaInfo = document.getElementById('lightboxMetaInfo');
     const btnMakeCover = document.getElementById('btnLightboxMakeCover');
     const btnDownload = document.getElementById('btnLightboxDownload');
+    const btnLightboxEdit = document.getElementById('btnLightboxEdit');
 
     const src = getImageSrc(photo);
     img.src = src;
@@ -908,6 +1265,14 @@
     img.style.animation = 'none';
     void img.offsetWidth;
     img.style.animation = '';
+
+    if (btnLightboxEdit) {
+      btnLightboxEdit.onclick = () => {
+        const pId = photo.id;
+        closeLightbox();
+        openEditPhotoModal(pId);
+      };
+    }
 
     btnMakeCover.onclick = () => {
       setPhotoAsAlbumCover(photo.id);
@@ -1043,6 +1408,343 @@
       .replace(/>/g, '&gt;')
       .replace(/"/g, '&quot;')
       .replace(/'/g, '&#39;');
+  }
+
+  // =========================================================================
+  // Highlight Section: Interactive Album Showcase & 3D Curved Carousel
+  // =========================================================================
+
+  const carouselState = {
+    currentAngle: 0,
+    targetAngle: 0,
+    isDragging: false,
+    startX: 0,
+    startAngle: 0,
+    lastX: 0,
+    velX: 0,
+    isHovered: false,
+    tiltX: 0,
+    tiltY: 0,
+    targetTiltX: 0,
+    targetTiltY: 0,
+    rafId: null,
+  };
+
+  function renderHighlightAlbumPills() {
+    const container = document.getElementById('highlightAlbumPills');
+    if (!container) return;
+
+    const albums = getAlbumsSummary();
+    const isAllActive = !state.highlightAlbum;
+
+    let html = `
+      <button type="button" class="highlight-album-pill ${isAllActive ? 'active' : ''}" data-album="">
+        All Photographs (${state.photos.length})
+      </button>
+    `;
+
+    albums.forEach(album => {
+      const isActive = state.highlightAlbum === album.title;
+      html += `
+        <button type="button" class="highlight-album-pill ${isActive ? 'active' : ''}" data-album="${escapeHTML(album.title)}">
+          ${escapeHTML(album.title)} (${album.photos.length})
+        </button>
+      `;
+    });
+
+    container.innerHTML = html;
+
+    container.querySelectorAll('.highlight-album-pill').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const album = btn.getAttribute('data-album');
+        setHighlightAlbum(album);
+      });
+    });
+  }
+
+  function setHighlightAlbum(albumName) {
+    state.highlightAlbum = albumName || '';
+    renderHighlightAlbumPills();
+    render3DCurvedCarousel();
+    showToast(
+      albumName
+        ? `Showcasing “${albumName}” in Highlight`
+        : 'Showcasing all photographs in Highlight',
+      'info'
+    );
+  }
+
+  function render3DCurvedCarousel() {
+    const stage = document.getElementById('carousel3DStage');
+    const notice = document.getElementById('highlightAlbumNotice');
+    if (!stage) return;
+
+    // Filter photos by selected highlight album if one is chosen
+    const pool = state.highlightAlbum
+      ? state.photos.filter(p => p.album === state.highlightAlbum)
+      : state.photos;
+
+    if (notice) {
+      if (state.highlightAlbum) {
+        notice.textContent = `Showcasing: ${state.highlightAlbum} (${pool.length} ${pool.length === 1 ? 'photograph' : 'photographs'})`;
+      } else {
+        notice.textContent = `Showcasing all photographs (${state.photos.length})`;
+      }
+    }
+
+    if (pool.length === 0) {
+      stage.innerHTML = `<span class="muted-note" style="color:var(--text-3); font-size:0.85rem;">No photographs found in “${escapeHTML(state.highlightAlbum)}”</span>`;
+      return;
+    }
+
+    // Ensure we have at least 8 items for a rich curved arc, repeating if needed
+    let showcaseItems = [...pool];
+    while (showcaseItems.length < 8) {
+      showcaseItems = showcaseItems.concat(pool);
+    }
+    showcaseItems = showcaseItems.slice(0, 14);
+
+    let html = '';
+    showcaseItems.forEach((photo, idx) => {
+      const src = getImageSrc(photo);
+      html += `
+        <div class="carousel-3d-card" data-carousel-idx="${idx}" data-photo-id="${escapeHTML(photo.id)}">
+          <img src="${src}" alt="${escapeHTML(photo.title)}" loading="lazy">
+          <div class="carousel-3d-card-overlay">
+            <span class="carousel-3d-card-title">${escapeHTML(photo.title)}</span>
+          </div>
+        </div>
+      `;
+    });
+
+    stage.innerHTML = html;
+
+    // Card click events
+    stage.querySelectorAll('.carousel-3d-card').forEach(card => {
+      card.addEventListener('click', () => {
+        const cardIdx = parseInt(card.getAttribute('data-carousel-idx'), 10);
+        const photoId = card.getAttribute('data-photo-id');
+        handleCarouselCardClick(cardIdx, photoId);
+      });
+    });
+  }
+
+  function handleCarouselCardClick(cardIdx, photoId) {
+    const stage = document.getElementById('carousel3DStage');
+    if (!stage) return;
+    const cards = stage.querySelectorAll('.carousel-3d-card');
+    const total = cards.length;
+    if (total === 0) return;
+
+    const angleStep = (15.5 * Math.PI) / 180;
+    const cardTheta = cardIdx * angleStep;
+    let diff = (cardTheta - carouselState.targetAngle) % (2 * Math.PI);
+    if (diff > Math.PI) diff -= 2 * Math.PI;
+    if (diff < -Math.PI) diff += 2 * Math.PI;
+
+    // If card is already near center, open full Lightbox view
+    if (Math.abs(diff) < 0.12) {
+      const filtered = getFilteredPhotos();
+      const pIdx = filtered.findIndex(p => p.id === photoId);
+      if (pIdx !== -1) {
+        openLightbox(pIdx);
+      } else {
+        const anyIdx = state.photos.findIndex(p => p.id === photoId);
+        if (anyIdx !== -1) openLightbox(anyIdx);
+      }
+    } else {
+      // Smoothly rotate clicked card into center
+      carouselState.targetAngle += diff;
+    }
+  }
+
+  function init3DCurvedCarousel() {
+    const viewport = document.getElementById('carousel3DViewport');
+    const stage = document.getElementById('carousel3DStage');
+    const prevBtn = document.getElementById('btnCarouselPrev');
+    const nextBtn = document.getElementById('btnCarouselNext');
+
+    if (!viewport || !stage) return;
+
+    const angleStep = (15.5 * Math.PI) / 180;
+
+    // Nav buttons
+    if (prevBtn) {
+      prevBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        carouselState.targetAngle -= angleStep;
+      });
+    }
+    if (nextBtn) {
+      nextBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        carouselState.targetAngle += angleStep;
+      });
+    }
+
+    // Hover state to pause auto-drift
+    viewport.addEventListener('mouseenter', () => {
+      carouselState.isHovered = true;
+    });
+    viewport.addEventListener('mouseleave', () => {
+      carouselState.isHovered = false;
+      carouselState.targetTiltX = 0;
+      carouselState.targetTiltY = 0;
+    });
+
+    // Mouse parallax tilt
+    viewport.addEventListener('mousemove', (e) => {
+      if (carouselState.isDragging) return;
+      const rect = viewport.getBoundingClientRect();
+      const normX = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+      const normY = ((e.clientY - rect.top) / rect.height) * 2 - 1;
+      carouselState.targetTiltY = normX * 10;
+      carouselState.targetTiltX = -normY * 6;
+    });
+
+    // Drag / Touch handlers
+    viewport.addEventListener('pointerdown', (e) => {
+      if (e.target.closest('.carousel-nav-btn')) return;
+      carouselState.isDragging = true;
+      carouselState.startX = e.clientX;
+      carouselState.startAngle = carouselState.targetAngle;
+      carouselState.lastX = e.clientX;
+      carouselState.velX = 0;
+      viewport.setPointerCapture(e.pointerId);
+    });
+
+    viewport.addEventListener('pointermove', (e) => {
+      if (!carouselState.isDragging) return;
+      const deltaX = e.clientX - carouselState.startX;
+      const currentW = viewport.getBoundingClientRect().width;
+      const radius = Math.max(440, currentW * 0.58);
+      carouselState.targetAngle = carouselState.startAngle - (deltaX / radius) * 1.5;
+      carouselState.velX = e.clientX - carouselState.lastX;
+      carouselState.lastX = e.clientX;
+    });
+
+    function endDrag() {
+      if (!carouselState.isDragging) return;
+      carouselState.isDragging = false;
+      const currentW = viewport.getBoundingClientRect().width;
+      const radius = Math.max(440, currentW * 0.58);
+      carouselState.targetAngle -= (carouselState.velX / radius) * 2.8;
+    }
+
+    viewport.addEventListener('pointerup', endDrag);
+    viewport.addEventListener('pointercancel', endDrag);
+
+    // Wheel horizontal scrolling support
+    viewport.addEventListener('wheel', (e) => {
+      if (Math.abs(e.deltaX) > Math.abs(e.deltaY) || e.shiftKey) {
+        e.preventDefault();
+        const delta = e.deltaX !== 0 ? e.deltaX : e.deltaY;
+        carouselState.targetAngle += (delta / 700) * angleStep;
+      }
+    }, { passive: false });
+
+    // 3D Animation Loop
+    function update3DCarousel() {
+      // Gentle auto-drift when idle
+      if (!carouselState.isHovered && !carouselState.isDragging) {
+        carouselState.targetAngle += 0.001;
+      }
+
+      // Interpolation
+      carouselState.currentAngle += (carouselState.targetAngle - carouselState.currentAngle) * 0.1;
+      carouselState.tiltX += (carouselState.targetTiltX - carouselState.tiltX) * 0.08;
+      carouselState.tiltY += (carouselState.targetTiltY - carouselState.tiltY) * 0.08;
+
+      // Tilt stage
+      stage.style.transform = `rotateX(${carouselState.tiltX.toFixed(2)}deg) rotateY(${carouselState.tiltY.toFixed(2)}deg)`;
+
+      const cards = stage.querySelectorAll('.carousel-3d-card');
+      const total = cards.length;
+
+      if (total > 0) {
+        const currentW = viewport.getBoundingClientRect().width;
+        const radius = Math.max(440, currentW * 0.58);
+        const maxVisibleAngle = Math.min(1.22, (currentW / radius) * 0.95);
+
+        cards.forEach((card, idx) => {
+          const cardTheta = idx * angleStep;
+          let delta = (cardTheta - carouselState.currentAngle) % (2 * Math.PI);
+          if (delta > Math.PI) delta -= 2 * Math.PI;
+          if (delta < -Math.PI) delta += 2 * Math.PI;
+
+          if (Math.abs(delta) <= maxVisibleAngle) {
+            // Cylindrical concave geometry
+            const x = Math.sin(delta) * radius;
+            const z = (Math.cos(delta) - 1) * radius - (Math.pow(delta, 2) * 16);
+            const rotY = -delta * (180 / Math.PI);
+            // Subtle smiling bottom curve
+            const y = Math.pow(Math.abs(delta), 1.5) * 34;
+            const scale = Math.max(0.72, 1 - Math.abs(delta) * 0.15);
+            const opacity = Math.max(0, 1 - Math.pow(Math.abs(delta) / maxVisibleAngle, 2.8));
+
+            card.style.display = 'block';
+            card.style.transform = `translate3d(${x.toFixed(1)}px, ${y.toFixed(1)}px, ${z.toFixed(1)}px) rotateY(${rotY.toFixed(1)}deg) scale(${scale.toFixed(3)})`;
+            card.style.opacity = opacity.toFixed(3);
+            card.style.zIndex = Math.round(1000 - Math.abs(delta) * 100);
+          } else {
+            card.style.display = 'none';
+          }
+        });
+      }
+
+      carouselState.rafId = requestAnimationFrame(update3DCarousel);
+    }
+
+    if (!carouselState.rafId) {
+      carouselState.rafId = requestAnimationFrame(update3DCarousel);
+    }
+  }
+
+  // =========================================================================
+  // Card 3D Tilt & Dynamic Spotlight Sheen
+  // =========================================================================
+
+  function initCardTiltEffects() {
+    function getCard(el) {
+      return el.closest('.album-card, .photo-card');
+    }
+
+    document.addEventListener('mousemove', (e) => {
+      const card = getCard(e.target);
+      if (!card) return;
+
+      const rect = card.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      const centerX = rect.width / 2;
+      const centerY = rect.height / 2;
+
+      // Gentle tactile 3D tilt
+      const rotateX = ((y - centerY) / centerY) * -5;
+      const rotateY = ((x - centerX) / centerX) * 5;
+
+      card.style.transform = `perspective(1000px) rotateX(${rotateX.toFixed(2)}deg) rotateY(${rotateY.toFixed(2)}deg) translateZ(6px)`;
+
+      // Dynamic sheen reflection
+      let sheen = card.querySelector('.card-sheen');
+      if (!sheen) {
+        sheen = document.createElement('div');
+        sheen.className = 'card-sheen';
+        card.appendChild(sheen);
+      }
+      sheen.style.background = `radial-gradient(circle at ${x.toFixed(0)}px ${y.toFixed(0)}px, rgba(255, 255, 255, 0.18) 0%, transparent 60%)`;
+      sheen.style.opacity = '1';
+    });
+
+    document.addEventListener('mouseout', (e) => {
+      const card = getCard(e.target);
+      if (!card) return;
+      if (!card.contains(e.relatedTarget)) {
+        card.style.transform = '';
+        const sheen = card.querySelector('.card-sheen');
+        if (sheen) sheen.style.opacity = '0';
+      }
+    });
   }
 
   // =========================================================================
@@ -1227,8 +1929,13 @@
       }
     });
 
-    // Initialize Bulk Upload
+    // Initialize Bulk Upload & Edit Modals
     initBulkUploadModal();
+    initEditModals();
+
+    // Initialize 3D Curved Showcase Carousel and Card Tilts
+    init3DCurvedCarousel();
+    initCardTiltEffects();
 
     // Initial Load of Database CSV
     loadMetadataCSV();
